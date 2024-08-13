@@ -2,24 +2,26 @@ package com.sbs.java.board;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 public class Main {
   static void makeTestData(List<Article> articles) {
     articles.add(new Article(1, "제목1", "내용1"));
     articles.add(new Article(2, "제목2", "내용2"));
     articles.add(new Article(3, "제목3", "내용3"));
   }
-
   public static void main(String[] args) {
     int lastArticleId = 0;
     Article lastArticle = null;
-
     List<Article> articles = new ArrayList<>();
 
     makeTestData(articles);
 
+    if (!articles.isEmpty()) {
+      lastArticleId = articles.get(articles.size() - 1).id;
+    }
+
     Scanner sc = new Scanner(System.in);
     System.out.println("== 자바 텍스트 게시판 ==");
+
     while (true) {
       System.out.print("명령) ");
       String cmd = sc.nextLine();
@@ -32,11 +34,15 @@ public class Main {
         int id = ++lastArticleId;
         Article article = new Article(id, subject, content); // 게시물 객체 생성
         lastArticle = article;
-        System.out.println("생성 된 게시물 객체 : " + article);
+
+        articles.add(article);
+
         System.out.printf("%d번 게시물이 등록되었습니다.\n", article.id);
       } else if (cmd.equals("/usr/article/detail")) {
+
         Article article = lastArticle;
-        if(article == null) {
+
+        if (article == null) {
           System.out.println("게시물이 존재하지 않습니다.");
           continue;
         }
@@ -44,8 +50,9 @@ public class Main {
         System.out.printf("번호 : %d\n", article.id);
         System.out.printf("제목 : %s\n", article.subject);
         System.out.printf("내용 : %s\n", article.content);
+
       } else if (cmd.equals("/usr/article/list")) {
-        if(articles.size() == 0) {
+        if (articles.size() == 0) {
           System.out.println("게시물이 존재하지 않습니다.");
           continue;
         }
@@ -53,7 +60,8 @@ public class Main {
         System.out.println("-------------------");
         System.out.println("|  번호  |  제목  |");
         System.out.println("-------------------");
-        for(int i = articles.size() - 1; i >= 0; i--) {
+
+        for (int i = articles.size() - 1; i >= 0; i--) {
           Article article = articles.get(i);
           System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
         }
