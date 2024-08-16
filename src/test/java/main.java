@@ -7,14 +7,12 @@ class Main {
     System.out.println(params);
     System.out.println(rq.getParams());
     System.out.println(rq.getParams());
-
     String urlPath = rq.getUrlPath();
     System.out.println(urlPath);
     System.out.println(rq.getUrlPath());
     System.out.println(rq.getUrlPath());
   }
 }
-
 class Rq {
   String url;
   Map<String, String> params;
@@ -22,24 +20,18 @@ class Rq {
 
   Rq(String url) {
     this.url = url;
+    this.params = Util.getParamsFromUrl(url);
+    this.urlPath = Util.getUrlPathFromUrl(url);
   }
 
   public Map<String, String> getParams() {
-    if(params == null) {
-      params = Util.getParamsFromUrl(url);
-    }
-
     return params;
   }
 
   public String getUrlPath() {
-    if(urlPath == null) {
-      urlPath = Util.getUrlPathFromUrl(url);
-    }
     return urlPath;
   }
 }
-
 class Util {
   static Map<String, String> getParamsFromUrl(String url) {
     System.out.println("getParamsFromUrl 실행됨");
