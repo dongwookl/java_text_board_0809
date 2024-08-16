@@ -1,7 +1,6 @@
 package com.sbs.java.board;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+
 public class Main {
   static void makeTestData(List<Article> articles) {
     articles.add(new Article(1, "제목1", "내용1"));
@@ -83,5 +82,53 @@ class Article {
   @Override // 어노테이션
   public String toString() { // 메서드 오버라이딩
     return "{id : %d, subject: \"%s\", content : \"%s\"}".formatted(id, subject, content);
+  }
+}
+
+class Rq {
+  String url;
+  Map<String, String> params;
+  String urlPath;
+
+  Rq(String url) {
+    this.url = url;
+    this.params = Util.getParamsFromUrl(url);
+    this.urlPath = Util.getUrlPathFromUrl(url);
+  }
+
+  public Map<String, String> getParams() {
+    return params;
+  }
+
+  public String getUrlPath() {
+    return urlPath;
+  }
+}
+
+class Util {
+  static Map<String, String> getParamsFromUrl(String url) {
+    Map<String, String> params = new LinkedHashMap<>();
+    String[] urlBits = url.split("\\?", 2);
+
+    if(urlBits.length == 1) {
+      return params;
+    }
+
+    String queryStr = urlBits[1];
+    for(String bit : queryStr.split("&")) {
+      String[] bits = bit.split("=", 2);
+
+      if(bits.length == 1) {
+        continue;
+      }
+
+      params.put(bits[0], bits[1]);
+    }
+
+    return params;
+  }
+
+  static String getUrlPathFromUrl(String url) {
+    return url.split("\\?", 2)[0];
   }
 }
