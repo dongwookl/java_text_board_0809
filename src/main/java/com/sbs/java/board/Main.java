@@ -1,11 +1,14 @@
 package com.sbs.java.board;
+
 import java.util.*;
+import java.util.stream.IntStream;
+
 public class Main {
   static void makeTestData(List<Article> articles) {
-    articles.add(new Article(1, "제목1", "내용1"));
-    articles.add(new Article(2, "제목2", "내용2"));
-    articles.add(new Article(3, "제목3", "내용3"));
+    IntStream.rangeClosed(1, 100)
+        .forEach(i -> articles.add(new Article(i, "제목" + i, "내용1" + i)));
   }
+
   public static void main(String[] args) {
     int lastArticleId = 0;
     List<Article> articles = new ArrayList<>();
@@ -53,26 +56,19 @@ public class Main {
         System.out.printf("내용 : %s\n", article.content);
       } else if (rq.getUrlPath().equals("/usr/article/list")) {
         Map<String, String> params = rq.getParams();
-
         if (articles.isEmpty()) {
           System.out.println("게시물이 존재하지 않습니다.");
           continue;
         }
-
         boolean orderByIdDesc = true;
-
         if (params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
           orderByIdDesc = false;
         }
-
         // 검색 시작
         List<Article> filteredArticles = articles;
-
         if(params.containsKey("searchKeyword")) {
           String searchKeyword = params.get("searchKeyword");
-
           filteredArticles = new ArrayList<>();
-
           for(Article article : articles) {
             if(article.subject.contains(searchKeyword) || article.content.contains(searchKeyword)) {
               filteredArticles.add(article);
@@ -80,15 +76,12 @@ public class Main {
           }
         }
         // 검색 끝
-
         List<Article> soredArticles = filteredArticles;
         // List<Article> soredArticles = articles;
-
         System.out.println("== 게시물 리스트 ==");
         System.out.println("-------------------");
         System.out.println("|  번호  |  제목  |");
         System.out.println("-------------------");
-
         if(orderByIdDesc) { // idAsc(오름차순)가 없으면 기본값인 idDesc(내림차순)
           for (int i = soredArticles.size() - 1; i >= 0; i--) {
             Article article = soredArticles.get(i);
@@ -100,7 +93,6 @@ public class Main {
             System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
           }
         }
-
       } else if (rq.getUrlPath().equals("exit")) {
         break;
       } else {
