@@ -42,7 +42,6 @@ public class Main {
           System.out.println("게시물이 존재하지 않습니다.");
           continue;
         }
-
         if (id > articles.size()) {
           System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
           continue;
@@ -52,9 +51,13 @@ public class Main {
         System.out.printf("번호 : %d\n", article.id);
         System.out.printf("제목 : %s\n", article.subject);
         System.out.printf("내용 : %s\n", article.content);
-
       } else if (rq.getUrlPath().equals("/usr/article/list")) {
         Map<String, String> params = rq.getParams();
+
+        if (articles.isEmpty()) {
+          System.out.println("게시물이 존재하지 않습니다.");
+          continue;
+        }
 
         boolean orderByIdDesc = true;
 
@@ -62,26 +65,40 @@ public class Main {
           orderByIdDesc = false;
         }
 
+        // 검색 시작
+        List<Article> filteredArticles = articles;
+
+        if(params.containsKey("searchKeyword")) {
+          String searchKeyword = params.get("searchKeyword");
+
+          filteredArticles = new ArrayList<>();
+
+          for(Article article : articles) {
+            if(article.subject.contains(searchKeyword) || article.content.contains(searchKeyword)) {
+              filteredArticles.add(article);
+            }
+          }
+        }
+        // 검색 끝
+
+        List<Article> soredArticles = filteredArticles;
+        // List<Article> soredArticles = articles;
+
         System.out.println("== 게시물 리스트 ==");
         System.out.println("-------------------");
         System.out.println("|  번호  |  제목  |");
         System.out.println("-------------------");
 
         if(orderByIdDesc) { // idAsc(오름차순)가 없으면 기본값인 idDesc(내림차순)
-          for (int i = articles.size() - 1; i >= 0; i--) {
-            Article article = articles.get(i);
+          for (int i = soredArticles.size() - 1; i >= 0; i--) {
+            Article article = soredArticles.get(i);
             System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
           }
         }
         else {
-          for(Article article : articles) {
+          for(Article article : soredArticles) {
             System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
           }
-        }
-
-        if (articles.isEmpty()) {
-          System.out.println("게시물이 존재하지 않습니다.");
-          continue;
         }
 
       } else if (rq.getUrlPath().equals("exit")) {
@@ -128,19 +145,15 @@ class Util {
   static Map<String, String> getParamsFromUrl(String url) {
     Map<String, String> params = new LinkedHashMap<>();
     String[] urlBits = url.split("\\?", 2);
-
     if (urlBits.length == 1) {
       return params;
     }
-
     String queryStr = urlBits[1];
     for (String bit : queryStr.split("&")) {
       String[] bits = bit.split("=", 2);
-
       if (bits.length == 1) {
         continue;
       }
-
       params.put(bits[0], bits[1]);
     }
     return params;
