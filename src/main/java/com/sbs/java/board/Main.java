@@ -1,8 +1,6 @@
 package com.sbs.java.board;
-
 import java.util.*;
 import java.util.stream.IntStream;
-
 public class Main {
   static void makeTestData(List<Article> articles) {
     IntStream.rangeClosed(1, 100)
@@ -66,11 +64,14 @@ public class Main {
         }
         // 검색 시작
         List<Article> filteredArticles = articles;
-        if(params.containsKey("searchKeyword")) {
+
+        if (params.containsKey("searchKeyword")) {
           String searchKeyword = params.get("searchKeyword");
+
           filteredArticles = new ArrayList<>();
-          for(Article article : articles) {
-            if(article.subject.contains(searchKeyword) || article.content.contains(searchKeyword)) {
+
+          for (Article article : articles) {
+            if (article.subject.contains(searchKeyword) || article.content.contains(searchKeyword)) {
               filteredArticles.add(article);
             }
           }
@@ -82,17 +83,15 @@ public class Main {
         System.out.println("-------------------");
         System.out.println("|  번호  |  제목  |");
         System.out.println("-------------------");
-        if(orderByIdDesc) { // idAsc(오름차순)가 없으면 기본값인 idDesc(내림차순)
-          for (int i = soredArticles.size() - 1; i >= 0; i--) {
-            Article article = soredArticles.get(i);
-            System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
-          }
+
+        if (orderByIdDesc) { // idAsc(오름차순)가 없으면 기본값인 idDesc(내림차순)
+          soredArticles = Util.reverseList(soredArticles);
         }
-        else {
-          for(Article article : soredArticles) {
-            System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
-          }
+
+        for (Article article : soredArticles) {
+          System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
         }
+
       } else if (rq.getUrlPath().equals("exit")) {
         break;
       } else {
@@ -152,5 +151,16 @@ class Util {
   }
   static String getUrlPathFromUrl(String url) {
     return url.split("\\?", 2)[0];
+  }
+
+  // 이 함수는 원본리스트를 훼손하지 않고, 새 리스트를 만듭니다.
+  // 즉 정렬이 반대인 복사본리스트를 만들어서 반환합니다.
+  public static <T> List<T> reverseList(List<T> list) {
+    List<T> reverse = new ArrayList<>(list.size());
+
+    for (int i = list.size() - 1; i >= 0; i--) {
+      reverse.add(list.get(i));
+    }
+    return reverse;
   }
 }
