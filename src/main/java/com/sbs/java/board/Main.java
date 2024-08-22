@@ -6,7 +6,6 @@ public class Main {
     IntStream.rangeClosed(1, 100)
         .forEach(i -> articles.add(new Article(i, "제목" + i, "내용" + i)));
   }
-
   public static void main(String[] args) {
     int lastArticleId = 0;
     List<Article> articles = new ArrayList<>();
@@ -29,30 +28,10 @@ public class Main {
         int id = ++lastArticleId;
         Article article = new Article(id, subject, content); // 게시물 객체 생성
         articles.add(article);
+
         System.out.printf("%d번 게시물이 등록되었습니다.\n", article.id);
       } else if (rq.getUrlPath().equals("/usr/article/detail")) {
-        Map<String, String> params = rq.getParams();
-        int id = 0;
-        try {
-          id = Integer.parseInt(params.get("id"));
-        } catch (NumberFormatException e) {
-          System.out.println("id를 정수 형태로 입력해주세요.");
-          continue;
-        }
-        if (articles.isEmpty()) {
-          System.out.println("게시물이 존재하지 않습니다.");
-          continue;
-        }
-        if (id > articles.size()) {
-          System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
-          continue;
-        }
-        Article article = articles.get(id - 1);
-        System.out.println("== 게시물 상세보기 ==");
-        System.out.printf("번호 : %d\n", article.id);
-        System.out.printf("제목 : %s\n", article.subject);
-        System.out.printf("내용 : %s\n", article.content);
-
+        actionUsrArticleDetail(rq, articles);
       } else if (rq.getUrlPath().equals("/usr/article/list")) {
         actionUsrArticleList(rq, articles);
       } else if (rq.getUrlPath().equals("exit")) {
@@ -61,9 +40,37 @@ public class Main {
         System.out.println("잘못 된 명령어입니다.");
       }
     }
-
     System.out.println("== 자바 텍스트 게시판 종료 ==");
     sc.close();
+  }
+
+  static void actionUsrArticleDetail(Rq rq, List<Article> articles) {
+    Map<String, String> params = rq.getParams();
+    int id = 0;
+
+    try {
+      id = Integer.parseInt(params.get("id"));
+    } catch (NumberFormatException e) {
+      System.out.println("id를 정수 형태로 입력해주세요.");
+      return;
+    }
+
+    if (articles.isEmpty()) {
+      System.out.println("게시물이 존재하지 않습니다.");
+      return;
+    }
+
+    if (id > articles.size()) {
+      System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
+      return;
+    }
+
+    Article article = articles.get(id - 1);
+
+    System.out.println("== 게시물 상세보기 ==");
+    System.out.printf("번호 : %d\n", article.id);
+    System.out.printf("제목 : %s\n", article.subject);
+    System.out.printf("내용 : %s\n", article.content);
   }
 
   static void actionUsrArticleList(Rq rq, List<Article> articles) {
@@ -73,21 +80,15 @@ public class Main {
       System.out.println("게시물이 존재하지 않습니다.");
       return;
     }
-
     boolean orderByIdDesc = true;
-
     if (params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
       orderByIdDesc = false;
     }
-
     // 검색 시작
     List<Article> filteredArticles = articles;
-
     if (params.containsKey("searchKeyword")) {
       String searchKeyword = params.get("searchKeyword");
-
       filteredArticles = new ArrayList<>();
-
       for (Article article : articles) {
         if (article.subject.contains(searchKeyword) || article.content.contains(searchKeyword)) {
           filteredArticles.add(article);
@@ -95,25 +96,20 @@ public class Main {
       }
     }
     // 검색 끝
-
     List<Article> soredArticles = filteredArticles;
     // List<Article> soredArticles = articles;
-
     System.out.println("== 게시물 리스트 ==");
     System.out.println("-------------------");
     System.out.println("|  번호  |  제목  |");
     System.out.println("-------------------");
-
     if (orderByIdDesc) { // idAsc(오름차순)가 없으면 기본값인 idDesc(내림차순)
       soredArticles = Util.reverseList(soredArticles);
     }
-
     for (Article article : soredArticles) {
       System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
     }
   }
 }
-
 class Article {
   int id;
   String subject;
