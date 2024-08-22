@@ -28,6 +28,8 @@ public class Main {
         actionUsrArticleList(rq, articles);
       } else if (rq.getUrlPath().equals("/usr/article/modify")) {
         actionUsrArticleModify(sc, rq, articles);
+      } else if (rq.getUrlPath().equals("/usr/article/delete")) {
+        actionUsrArticleDelete(rq, articles);
       } else if (rq.getUrlPath().equals("exit")) {
         break;
       } else {
@@ -36,6 +38,42 @@ public class Main {
     }
     System.out.println("== 자바 텍스트 게시판 종료 ==");
     sc.close();
+  }
+
+  private static void actionUsrArticleDelete(Rq rq, List<Article> articles) {
+    Map<String, String> params = rq.getParams();
+    int id = 0;
+
+    try {
+      id = Integer.parseInt(params.get("id"));
+    } catch (NumberFormatException e) {
+      System.out.println("id를 정수 형태로 입력해주세요.");
+      return;
+    }
+    if (articles.isEmpty()) {
+      System.out.println("게시물이 존재하지 않습니다.");
+      return;
+    }
+
+    /*
+    // 별도의 함수로 분리
+    Article findArticle = null;
+    for(Article article : articles) {
+      if(article.id == id) {
+        findArticle = article;
+      }
+    }
+     */
+
+    Article article = articleFindById(id, articles);
+
+    if(article == null) {
+      System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
+      return;
+    }
+
+    articles.remove(article);
+    System.out.printf("%d번 게시물이 삭제되었습니다.\n", id);
   }
 
   private static void actionUsrArticleModify(Scanner sc, Rq rq, List<Article> articles) {
@@ -54,22 +92,19 @@ public class Main {
       return;
     }
 
-    if (id > articles.size()) {
+    Article article = articleFindById(id, articles);
+
+    if(article == null) {
       System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
       return;
     }
 
-    Article article = articles.get(id - 1);
-
     System.out.print("새 제목 : ");
     article.subject = sc.nextLine();
-
     System.out.print("새 내용 : ");
     article.content = sc.nextLine();
-
     System.out.printf("%d번 게시물이 수정되었습니다.\n", id);
   }
-
   static void actionUsrArticleWrite(Scanner sc, List<Article> articles, int lastArticleId) {
     System.out.println("== 게시물 작성 ==");
     System.out.print("제목 : ");
@@ -94,11 +129,14 @@ public class Main {
       System.out.println("게시물이 존재하지 않습니다.");
       return;
     }
-    if (id > articles.size()) {
+
+    Article article = articleFindById(id, articles);
+
+    if(article == null) {
       System.out.printf("%d번 게시물은 존재하지 않습니다.\n", id);
       return;
     }
-    Article article = articles.get(id - 1);
+
     System.out.println("== 게시물 상세보기 ==");
     System.out.printf("번호 : %d\n", article.id);
     System.out.printf("제목 : %s\n", article.subject);
@@ -139,7 +177,18 @@ public class Main {
       System.out.printf("|   %d    |  %s  |\n", article.id, article.subject);
     }
   }
+
+  private static Article articleFindById(int id, List<Article> articles) {
+    for(Article article : articles) {
+      if(article.id == id) {
+        return article;
+      }
+    }
+
+    return null;
+  }
 }
+
 class Article {
   int id;
   String subject;
@@ -187,11 +236,9 @@ class Util {
     }
     return params;
   }
-
   static String getUrlPathFromUrl(String url) {
     return url.split("\\?", 2)[0];
   }
-
   // 이 함수는 원본리스트를 훼손하지 않고, 새 리스트를 만듭니다.
   // 즉 정렬이 반대인 복사본리스트를 만들어서 반환합니다.
   public static <T> List<T> reverseList(List<T> list) {
